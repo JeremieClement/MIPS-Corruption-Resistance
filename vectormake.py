@@ -20,28 +20,35 @@ except Exception, message:
 #Arbitrarily chosen constants (1 for each desired lock)
 cst1 = '0x12345678'
 cst2 = '0x9ABCDEF0'
+#address where will be written the third lock for verifications by the program in memory (8 bits)
+addr = '0x11342222'
 #Definition of the lock variables
 b = ''
 c = ''
-#Defines the end of the program P
+#Defines the size of the program P
 endoffset = len(fichier.readlines())-4
 fichier.seek(0, os.SEEK_SET)
 #Put the constants first
 vector = "3C0A"+cst1[2:6]+"\n354A"+cst1[6:10]+"\n3C0B"+cst2[2:6]+"\n356B"+cst2[6:10]+"\n"
-#The start offset and verification (don't forget twice)
-vector += "24040018\n24050018\n"
-vector += "1485" + '0'*(4-len(hex(22+endoffset)[2:])) + hex(22+endoffset)[2:] + "\n"
+#Start address of the first instruction to be verified
+startaddr = "0x0040003C"
+#The start of the verification (don't forget twice)
+vector += "3C04"+startaddr[2:6]+"\n3484"+startaddr[6:10]+"\n3C05"+startaddr[2:6]+"\n34A5"+startaddr[6:10]+"\n"
+vector += "1485" + '0'*(4-len(hex(28+endoffset)[2:])) + hex(28+endoffset)[2:] + "\n"
 vector += "00000000\n"
-totalsize = ((endoffset + 4 + 35) -1) * 4
-vector +="2405" + '0'*(4-len(hex(totalsize)[2:])) + hex(totalsize)[2:] + "\n24060000\n8C890000\n00000000\n"
+totalsize = int(startaddr, 16) + ((endoffset + 4 + 39) -1) * 4 
+totalS = '0'*(8-len(hex(totalsize)[2:])) + hex(totalsize)[2:]
+vector +="3C05" + totalS[2:6] + "\n34A5" + totalS[6:10] + "\n24060000\n8C890000\n00000000\n"
 #The checksum calculation function
-vector +="01094020\n20840004\n10850007\n00000000\n8C890000\n00000000\n01094026\n20840004\n1485FFF5\n00000000\n"
+vector +="01094021\n20840004\n10850007\n00000000\n8C890000\n00000000\n01094026\n20840004\n1485FFF5\n00000000\n"
 #First lock Verification
-vector +="1507" + '0'*(4-len(hex(6+endoffset)[2:])) + hex(6 + endoffset)[2:] + "\n"
+vector +="1507" + '0'*(4-len(hex(11+endoffset)[2:])) + hex(11 + endoffset)[2:] + "\n"
 #Second lock verification
-vector +="00000000\n010A4020\n150D" + '0'*(4-len(hex(3+endoffset)[2:])) + hex(3+endoffset)[2:] + "\n"
+vector +="00000000\n010A4021\n150D" + '0'*(4-len(hex(8+endoffset)[2:])) + hex(8+endoffset)[2:] + "\n"
 #Third lock verification
-vector +="00000000\n010B4020\n150E" + '0'*(4-len(hex(endoffset)[2:])) + hex(endoffset)[2:] + "\n"
+vector +="00000000\n010B4021\n150E" + '0'*(4-len(hex(5+endoffset)[2:])) + hex(5+endoffset)[2:] + "\n"
+#Store of the verification value used inside the program to avoid jumps
+vector +="00000000\n3C0F" + addr[2:6] + "\n35EF" + addr[6:10] +"\nADE80000\nADEE0004\n"
 ofic.write(vector)
 #Write it in a file
 while 1:
