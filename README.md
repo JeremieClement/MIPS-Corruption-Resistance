@@ -9,3 +9,5 @@ Input => The MIPS program in hexadecimal code (one instruction per line)
 
 Output => outputP.hex, which contains the hexadecimal program with the vector.
 
+An example of input (inputP.hex) and output (outputP.hex) files have been provided
+
