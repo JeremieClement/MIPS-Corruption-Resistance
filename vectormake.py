@@ -5,11 +5,13 @@ import os
 Generates the Vector for a MIPS program to protect it from
 alterations.
 Example based on a three lock verification. More locks can be added
+Input : InputP.hex, containing the hex code of the instructions of the program
+Output : OutputP.hex the program with the vector
 Author: Jeremie CLEMENT
 '''
 #Input program
 try:
-	fichier = open("InputP.hex","r")
+	fichier = open("testtrans.hex","r")
 except Exception, message:
 	print message
 #Output program + vector
@@ -27,7 +29,7 @@ b = ''
 c = ''
 #Defines the size of the program P
 endoffset = len(fichier.readlines())-4
-fichier.seek(0, os.SEEK_SET)
+fichier.seek(0, 0)
 #Put the constants first
 vector = "3C01"+cst1[2:6]+"\n342A"+cst1[6:10]+"\n3C01"+cst2[2:6]+"\n342B"+cst2[6:10]+"\n"
 #Start address of the first instruction to be verified
@@ -37,7 +39,7 @@ vector += "3C01"+startaddr[2:6]+"\n3434"+startaddr[6:10] + "\n"
 #The end address (39 is the number of instructions in V since startaddr)
 totalsize = int(startaddr, 16) + ((endoffset + 4 + 39) -1) * 4 
 totalS = '0'*(8-len(hex(totalsize)[2:])) + hex(totalsize)[2:]
-vector +="3C01" + totalS[2:6] + "\n3435" + totalS[6:10] + "\n0000b020\n"
+vector +="3C01" + totalS[0:4] + "\n3435" + totalS[4:8] + "\n0000b020\n"
 #Adding The multiplicative constant
 phi = '0x9E3779B1'
 vector +="3C01"+phi[2:6]+"\n342f"+phi[6:10]+"\n"
@@ -72,7 +74,7 @@ vector +="34027fff\n3042000a\n34110001\n022d100a\n0000000c\n"
 #Third lock verification
 vector +="010B4021\n"
 #Store of the verification value used inside the program to avoid jumps
-vector +="3C0F" + addr[2:6] + "\n35EF" + addr[6:10] +"\nADE80000\nADEE0004\n010E7026"
+vector +="3C0F" + addr[2:6] + "\n35EF" + addr[6:10] +"\nADE80000\nADEE0004\n010E7026\n"
 vector +="34027fff\n3042000a\n34110001\n022e100a\n0000000c\n"
 ofic.write(vector)
 #Write it in a file
@@ -93,10 +95,10 @@ multi = int('9E3779B1', 16)
 while 1:
     ligne = ofic.readline()
     if not ligne : break
-	chk = chk * multi
+    chk = chk * multi
     chk = chk & int('FFFFFFFF', 16)
-	chk = chk + int(ligne, 16)
-	chk = chk & int('FFFFFFFF', 16)
+    chk = chk + int(ligne, 16)
+    chk = chk & int('FFFFFFFF', 16)
 check = '0'*(8-len(hex(chk)[2:-1])) + hex(chk)[2:-1]
 verifvector = "3C13" + check[:4] + "\n3673" + check[4:] + "\n"
 #Second lock value calculation
@@ -114,7 +116,7 @@ except Exception, message:
 	print message
 
 fichier.write(verifvector)
-ofic.seek(0, os.SEEK_SET)
+ofic.seek(0, 0)
 while 1:
     ligne = ofic.readline()
     if not ligne : break
