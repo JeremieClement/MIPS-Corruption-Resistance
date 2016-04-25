@@ -11,7 +11,7 @@ Author: Jeremie CLEMENT
 '''
 #Input program
 try:
-	fichier = open("testtrans.hex","r")
+	fichier = open("inputP.hex","r")
 except Exception, message:
 	print message
 #Output program + vector
