@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #!coding=latin1
-import os
+import os, sys
 '''
 Generates the Vector for a MIPS program to protect it from
 alterations.
@@ -10,8 +10,12 @@ Output : OutputP.hex the program with the vector
 Author: Jeremie CLEMENT
 '''
 #Input program
+args = len(sys.argv)
+if (args !=2):
+	sys.exit()
+args = sys.argv[1]
 try:
-	fichier = open("testtrans.hex","r")
+	fichier = open(args,"r")
 except Exception, message:
 	print message
 #Output program + vector
